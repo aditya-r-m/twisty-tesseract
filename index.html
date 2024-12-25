@@ -4,11 +4,22 @@
     <meta charset="utf-8" />
     <title>hello-wasm example</title>
   </head>
-  <body>
+  <body style="max-width: max-content; margin: auto">
     <script type="module">
       import init, { greet } from "./pkg/twisty_tesseract.js";
       init().then(() => {
-       // TODO
+        for (let i = 0; i < 16; i++) {
+          let canvas = document.createElement("canvas");
+          canvas.style.width = "200px";
+          canvas.style.height = "200px";
+          canvas.style.border = "1px solid black";
+          canvas.style.margin = "2px";
+          canvas.style.float = "left";
+          if (!(i & 3)) {
+            canvas.style.clear = "left";
+          }
+          document.body.appendChild(canvas);
+        }
       });
     </script>
   </body>
