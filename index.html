@@ -6,7 +6,7 @@
   </head>
   <body style="max-width: max-content; margin: auto">
     <script type="module">
-      import init, { greet } from "./pkg/twisty_tesseract.js";
+      import init, { Tesseract } from "./pkg/twisty_tesseract.js";
       init().then(() => {
         for (let i = 0; i < 16; i++) {
           let canvas = document.createElement("canvas");
@@ -20,6 +20,9 @@
           }
           document.body.appendChild(canvas);
         }
+        let tesseract = new Tesseract();
+        console.log(tesseract);
+        console.log(tesseract.project());
       });
     </script>
   </body>

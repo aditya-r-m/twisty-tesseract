@@ -1,11 +1,11 @@
 use wasm_bindgen::prelude::*;
 
 const DIMENSIONS: usize = 4;
-const LEN_FACE: usize = 2usize.pow(DIMENSIONS as u32 - 1);
-const LEN: usize = LEN_FACE * 2 * DIMENSIONS as usize;
+const LEN_FACE: usize = 4usize.pow(DIMENSIONS as u32 - 1);
+const LEN: usize = LEN_FACE * 2 * DIMENSIONS;
 
 #[wasm_bindgen]
-struct Tesseract {
+pub struct Tesseract {
     colors: [u8; LEN],
 }
 
@@ -23,5 +23,9 @@ impl Tesseract {
         for i in 0..LEN - 1 {
             self.colors[i] = self.colors[i + 1];
         }
+    }
+
+    pub fn project(&self, i: usize) -> String {
+        format!("10,10,RED")
     }
 }
