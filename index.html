@@ -8,21 +8,28 @@
     <script type="module">
       import init, { Tesseract } from "./pkg/twisty_tesseract.js";
       init().then(() => {
-        for (let i = 0; i < 16; i++) {
-          let canvas = document.createElement("canvas");
-          canvas.style.width = "200px";
-          canvas.style.height = "200px";
-          canvas.style.border = "1px solid black";
-          canvas.style.margin = "2px";
-          canvas.style.float = "left";
-          if (!(i & 3)) {
-            canvas.style.clear = "left";
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("width", "800px");
+        canvas.setAttribute("height", "800px");
+        document.body.appendChild(canvas);
+        window.tesseract = Tesseract.new();
+        const renderLoop = () => {
+          const context = canvas.getContext('2d');
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const radius = 4;
+          for (let point of window.tesseract.project().split("|")) {
+            let [x, y, c] = point.split(",");
+            x = parseInt(x);
+            y = parseInt(y);
+            context.beginPath();
+            context.arc(centerX + x, centerY + y, radius, 0, 2 * Math.PI, false);
+            context.fillStyle = c;
+            context.fill();
           }
-          document.body.appendChild(canvas);
-        }
-        let tesseract = new Tesseract();
-        console.log(tesseract);
-        console.log(tesseract.project());
+          requestAnimationFrame(renderLoop);
+        };
+        renderLoop();
       });
     </script>
   </body>

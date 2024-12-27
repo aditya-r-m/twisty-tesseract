@@ -25,7 +25,7 @@ impl Tesseract {
         }
     }
 
-    pub fn project(&self, i: usize) -> String {
-        format!("10,10,RED")
+    pub fn project(&self) -> String {
+        format!("10,10,red")
     }
 }
