@@ -18,8 +18,9 @@
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
           const radius = 4;
+          console.log(window.tesseract.project());
           for (let point of window.tesseract.project().split("|")) {
-            let [x, y, c] = point.split(",");
+            let [x, y, _, c] = point.split(",");
             x = parseInt(x);
             y = parseInt(y);
             context.beginPath();
@@ -27,7 +28,7 @@
             context.fillStyle = c;
             context.fill();
           }
-          requestAnimationFrame(renderLoop);
+          //requestAnimationFrame(renderLoop);
         };
         renderLoop();
       });
