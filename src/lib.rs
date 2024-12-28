@@ -4,6 +4,18 @@ const DIMENSIONS: usize = 4;
 const LEN_FACE: usize = 4usize.pow(DIMENSIONS as u32 - 1);
 const LEN: usize = LEN_FACE * 2 * DIMENSIONS;
 
+#[derive(Debug)]
+enum Color {
+    RED = 0,
+    GREEN,
+    BLUE,
+    CYAN,
+    MAGENTA,
+    YELLOW,
+    WHITE,
+    BLACK,
+}
+
 #[wasm_bindgen]
 pub struct Tesseract {
     colors: [u8; LEN],
@@ -26,6 +38,6 @@ impl Tesseract {
     }
 
     pub fn project(&self) -> String {
-        format!("10,10,red")
+        format!("10,10,RED|20,20,{:?}", Color::CYAN)
     }
 }
