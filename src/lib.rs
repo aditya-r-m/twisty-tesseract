@@ -28,7 +28,6 @@ impl Tesseract {
         let mut p = 0usize;
         for a in 0..DIMENSIONS {
             for b in [-2isize, 2] {
-                color += 1;
                 for i in [-1isize, 0, 1] {
                     for j in [-1isize, 0, 1] {
                         for k in [-1isize, 0, 1] {
@@ -41,12 +40,13 @@ impl Tesseract {
                         }
                     }
                 }
+                color += 1;
             }
         }
         Tesseract { points }
     }
 
     pub fn project(&self) -> String {
-        format!("10,10,RED|20,20,{:?}", Color::CYAN)
+        format!("10,10,RED|20,20,CYAN")
     }
 }
