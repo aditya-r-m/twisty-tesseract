@@ -4,7 +4,7 @@ const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
 const EDGES: [isize; 4] = [-45, -15, 15, 45];
 const SPAN: isize = 200;
 const LEN: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
-const RADIUS: isize = 5;
+const RADIUS: isize = 7;
 
 const COLORS: [&str; 2 * DIMENSIONS.len()] = [
     "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "YELLOW", "WHITE", "PURPLE",
@@ -51,7 +51,7 @@ impl Tesseract {
         let mut projection = self
             .points
             .iter()
-            .filter(|point| point.coordinates[0] < SPAN - EDGES.last().unwrap())
+            .filter(|point| point.coordinates[0] < SPAN)
             .map(|&Point { color, coordinates }| {
                 let x = (SPAN * coordinates[1]) / (SPAN - coordinates[0]);
                 let y = (SPAN * coordinates[2]) / (SPAN - coordinates[0]);
@@ -69,7 +69,7 @@ impl Tesseract {
             .map(|(z, y, x, color)| {
                 format!(
                     "{x},{y},{},{}",
-                    (SPAN + z / RADIUS) * RADIUS / SPAN,
+                    (8 * SPAN * RADIUS) / (8 * SPAN - z),
                     COLORS[color]
                 )
             })
