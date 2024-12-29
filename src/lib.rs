@@ -1,9 +1,10 @@
 use wasm_bindgen::prelude::*;
 
 const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
-const EDGES: [isize; 4] = [-30, -10, 10, 30];
+const EDGES: [isize; 4] = [-45, -15, 15, 45];
 const SPAN: isize = 200;
 const LEN: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
+const RADIUS: isize = 5;
 
 const COLORS: [&str; 2 * DIMENSIONS.len()] = [
     "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "YELLOW", "WHITE", "PURPLE",
@@ -55,17 +56,23 @@ impl Tesseract {
                 let x = (SPAN * coordinates[1]) / (SPAN - coordinates[0]);
                 let y = (SPAN * coordinates[2]) / (SPAN - coordinates[0]);
                 let z = (SPAN * coordinates[3]) / (SPAN - coordinates[0]);
-                let xr0 = (4 * x - 3 * y) / 5;
-                let yr0 = (3 * x + 4 * y) / 5;
-                let zr1 = (4 * z - 3 * yr0) / 5;
-                let yr1 = (3 * z + 4 * yr0) / 5;
-                (zr1, yr1, xr0, color)
+                let xr0 = (4 * x - 3 * z) / 5;
+                let zr0 = (3 * x + 4 * z) / 5;
+                let zr1 = (4 * zr0 - 3 * y) / 5;
+                let yr1 = (3 * zr0 + 4 * y) / 5;
+                (-zr1, yr1, xr0, color)
             })
             .collect::<Vec<(isize, isize, isize, usize)>>();
         projection.sort();
         projection
             .into_iter()
-            .map(|(_, y, x, color)| format!("{x},{y},{}", COLORS[color]))
+            .map(|(z, y, x, color)| {
+                format!(
+                    "{x},{y},{},{}",
+                    (SPAN + z / RADIUS) * RADIUS / SPAN,
+                    COLORS[color]
+                )
+            })
             .collect::<Vec<String>>()
             .join("|")
     }

@@ -17,14 +17,13 @@
           const context = canvas.getContext('2d');
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
-          const radius = 4;
-          console.log(window.tesseract.project());
           for (let point of window.tesseract.project().split("|")) {
-            let [x, y, c] = point.split(",");
+            let [x, y, r, c] = point.split(",");
             x = parseInt(x);
             y = parseInt(y);
+            r = parseInt(r);
             context.beginPath();
-            context.arc(centerX + x, centerY + y, radius, 0, 2 * Math.PI, false);
+            context.arc(centerX + x, centerY + y, r, 0, 2 * Math.PI, false);
             context.fillStyle = c;
             context.fill();
             context.lineWidth = 1;
