@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use wasm_bindgen::prelude::*;
 
 const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
@@ -16,9 +18,14 @@ struct Point {
     coordinates: [isize; DIMENSIONS.len()],
 }
 
+struct Action {
+    permutation: [usize; LEN_POINTS],
+}
+
 #[wasm_bindgen]
 pub struct Tesseract {
     points: [Point; LEN_POINTS],
+    actions: BTreeMap<(bool, isize, isize), Action>,
 }
 
 #[wasm_bindgen]
@@ -44,7 +51,8 @@ impl Tesseract {
                 color += 1;
             }
         }
-        Tesseract { points }
+        let mut actions: BTreeMap<(bool, isize, isize), Action> = BTreeMap::new();
+        Tesseract { points, actions }
     }
 
     pub fn project(&self) -> String {
