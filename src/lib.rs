@@ -3,8 +3,10 @@ use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
 const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
-const EDGES: [isize; 4] = [-45, -15, 15, 45];
 const SPAN: isize = 200;
+const OFFSET_SMALL: isize = 15;
+const OFFSET_LARGE: isize = 45;
+const EDGES: [isize; 4] = [-OFFSET_LARGE, -OFFSET_SMALL, OFFSET_SMALL, OFFSET_LARGE];
 const LEN_POINTS: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
 const RADIUS: isize = 7;
 
@@ -52,6 +54,23 @@ impl Tesseract {
             }
         }
         let mut actions: BTreeMap<(bool, isize, isize), Action> = BTreeMap::new();
+        for d in [-1isize, 1isize] {
+            for a in 0..DIMENSIONS.len() as isize {
+                for sign_a in [-1isize, 1isize] {
+                    for b in 0..DIMENSIONS.len() as isize {
+                        for sign_b in [-1isize, 1isize] {
+                            let mut action = Action {
+                                permutation: [0; LEN_POINTS],
+                            };
+                            for p in 0..LEN_POINTS {
+                                action.permutation[p] = p;
+                            }
+                            actions.insert((d < 0, sign_a * a, sign_b * b), action);
+                        }
+                    }
+                }
+            }
+        }
         Tesseract { points, actions }
     }
 
