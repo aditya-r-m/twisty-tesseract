@@ -60,7 +60,7 @@ impl Tesseract {
                 let zr0 = (3 * x + 4 * z) / 5;
                 let zr1 = (4 * zr0 - 3 * y) / 5;
                 let yr1 = (3 * zr0 + 4 * y) / 5;
-                (-zr1, yr1, xr0, color)
+                (zr1, yr1, xr0, color)
             })
             .collect::<Vec<(isize, isize, isize, usize)>>();
         projection.sort();
