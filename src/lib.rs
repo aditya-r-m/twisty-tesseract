@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::*;
 const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
 const EDGES: [isize; 4] = [-45, -15, 15, 45];
 const SPAN: isize = 200;
-const LEN: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
+const LEN_POINTS: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
 const RADIUS: isize = 7;
 
 const COLORS: [&str; 2 * DIMENSIONS.len()] = [
@@ -18,13 +18,13 @@ struct Point {
 
 #[wasm_bindgen]
 pub struct Tesseract {
-    points: [Point; LEN],
+    points: [Point; LEN_POINTS],
 }
 
 #[wasm_bindgen]
 impl Tesseract {
     pub fn new() -> Tesseract {
-        let mut points = [Point::default(); LEN];
+        let mut points = [Point::default(); LEN_POINTS];
         let mut color = 0usize;
         let mut p = 0usize;
         for a in 0..DIMENSIONS.len() {
