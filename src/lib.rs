@@ -1,18 +1,18 @@
 use wasm_bindgen::prelude::*;
 
-const DIMENSIONS: usize = 4;
-const SIZE: usize = 3;
-const LENF: usize = SIZE.pow(DIMENSIONS as u32 - 1);
-const LEN: usize = LENF * 2 * DIMENSIONS;
+const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
+const EDGES: [isize; 4] = [-30, -10, 10, 30];
+const SPAN: isize = 200;
+const LEN: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1) * 2 * DIMENSIONS.len();
 
-const COLORS: [&str; 2 * DIMENSIONS] = [
-    "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "PURPLE", "WHITE", "BLACK",
+const COLORS: [&str; 2 * DIMENSIONS.len()] = [
+    "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "YELLOW", "WHITE", "PURPLE",
 ];
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Point {
     color: usize,
-    coordinates: [isize; DIMENSIONS],
+    coordinates: [isize; DIMENSIONS.len()],
 }
 
 #[wasm_bindgen]
@@ -26,16 +26,16 @@ impl Tesseract {
         let mut points = [Point::default(); LEN];
         let mut color = 0usize;
         let mut p = 0usize;
-        for a in 0..DIMENSIONS {
-            for b in [-3isize, 3] {
-                for i in [-1isize, 0, 1] {
-                    for j in [-1isize, 0, 1] {
-                        for k in [-1isize, 0, 1] {
+        for a in 0..DIMENSIONS.len() {
+            for b in [-SPAN, SPAN] {
+                for i in EDGES {
+                    for j in EDGES {
+                        for k in EDGES {
                             points[p].color = color;
                             points[p].coordinates[a] = b;
-                            points[p].coordinates[(a + 1) % DIMENSIONS] = i;
-                            points[p].coordinates[(a + 2) % DIMENSIONS] = j;
-                            points[p].coordinates[(a + 3) % DIMENSIONS] = k;
+                            points[p].coordinates[(a + 1) % DIMENSIONS.len()] = i;
+                            points[p].coordinates[(a + 2) % DIMENSIONS.len()] = j;
+                            points[p].coordinates[(a + 3) % DIMENSIONS.len()] = k;
                             p += 1;
                         }
                     }
@@ -47,15 +47,25 @@ impl Tesseract {
     }
 
     pub fn project(&self) -> String {
-        self.points
+        let mut projection = self
+            .points
             .iter()
-            .filter(|point| point.coordinates[0] < 2)
+            .filter(|point| point.coordinates[0] < SPAN - EDGES.last().unwrap())
             .map(|&Point { color, coordinates }| {
-                let x = (200 * 100 * coordinates[1]) / (200 - 100 * coordinates[0]);
-                let y = (200 * 100 * coordinates[2]) / (200 - 100 * coordinates[0]);
-                let z = (200 * 100 * coordinates[3]) / (200 - 100 * coordinates[0]);
-                format!("{x},{y},{z},{}", COLORS[color])
+                let x = (SPAN * coordinates[1]) / (SPAN - coordinates[0]);
+                let y = (SPAN * coordinates[2]) / (SPAN - coordinates[0]);
+                let z = (SPAN * coordinates[3]) / (SPAN - coordinates[0]);
+                let xr0 = (4 * x - 3 * y) / 5;
+                let yr0 = (3 * x + 4 * y) / 5;
+                let zr1 = (4 * z - 3 * yr0) / 5;
+                let yr1 = (3 * z + 4 * yr0) / 5;
+                (zr1, yr1, xr0, color)
             })
+            .collect::<Vec<(isize, isize, isize, usize)>>();
+        projection.sort();
+        projection
+            .into_iter()
+            .map(|(_, y, x, color)| format!("{x},{y},{}", COLORS[color]))
             .collect::<Vec<String>>()
             .join("|")
     }

@@ -20,13 +20,16 @@
           const radius = 4;
           console.log(window.tesseract.project());
           for (let point of window.tesseract.project().split("|")) {
-            let [x, y, _, c] = point.split(",");
+            let [x, y, c] = point.split(",");
             x = parseInt(x);
             y = parseInt(y);
             context.beginPath();
             context.arc(centerX + x, centerY + y, radius, 0, 2 * Math.PI, false);
             context.fillStyle = c;
             context.fill();
+            context.lineWidth = 1;
+            context.strokeStyle = 'black';
+            context.stroke();
           }
           //requestAnimationFrame(renderLoop);
         };
