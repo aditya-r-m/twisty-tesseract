@@ -118,16 +118,16 @@ impl Tesseract {
         }
     }
 
-    pub fn project(&self) -> String {
+    pub fn project(&self, b: usize, s: isize) -> String {
         let mut projection = self
             .points
             .iter()
             .zip(self.state)
-            .filter(|(point, _)| point[0] < SPAN)
+            .filter(|(point, _)| point[b] * s < SPAN)
             .map(|(point, c)| {
-                let x = (SPAN * point[1]) / (SPAN - point[0]);
-                let y = (SPAN * point[2]) / (SPAN - point[0]);
-                let z = (SPAN * point[3]) / (SPAN - point[0]);
+                let x = (SPAN * point[(b + 1) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
+                let y = (SPAN * point[(b + 2) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
+                let z = (SPAN * point[(b + 3) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
                 let xr0 = (4 * x - 3 * z) / 5;
                 let zr0 = (3 * x + 4 * z) / 5;
                 let zr1 = (4 * zr0 - 3 * y) / 5;
