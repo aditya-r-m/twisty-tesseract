@@ -2,22 +2,22 @@ use std::collections::BTreeMap;
 
 use wasm_bindgen::prelude::*;
 
-const DIMENSIONS: [char; 4] = ['w', 'x', 'y', 'z'];
+const LEN_DIMENSIONS: usize = 4;
+const LEN_FACE: usize = EDGES.len().pow(LEN_DIMENSIONS as u32 - 1);
+const LEN: usize = LEN_FACE * 2 * LEN_DIMENSIONS;
 const SPAN: isize = 200;
 const OFFSET_SMALL: isize = 15;
 const OFFSET_LARGE: isize = 45;
 const EDGES: [isize; 4] = [-OFFSET_LARGE, -OFFSET_SMALL, OFFSET_SMALL, OFFSET_LARGE];
-const LEN_FACE: usize = EDGES.len().pow(DIMENSIONS.len() as u32 - 1);
-const LEN: usize = LEN_FACE * 2 * DIMENSIONS.len();
 const RADIUS: isize = 7;
 
-const COLORS: [&str; 2 * DIMENSIONS.len()] = [
+const COLORS: [&str; 2 * LEN_DIMENSIONS] = [
     "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "YELLOW", "WHITE", "PURPLE",
 ];
 
 #[wasm_bindgen]
 pub struct Tesseract {
-    points: [[isize; DIMENSIONS.len()]; LEN],
+    points: [[isize; LEN_DIMENSIONS]; LEN],
     state: [usize; LEN],
     actions: BTreeMap<[usize; 4], [usize; LEN]>,
 }
@@ -25,17 +25,17 @@ pub struct Tesseract {
 #[wasm_bindgen]
 impl Tesseract {
     pub fn new() -> Tesseract {
-        let mut points = [[0isize; DIMENSIONS.len()]; LEN];
+        let mut points = [[0isize; LEN_DIMENSIONS]; LEN];
         let mut p = 0usize;
-        for a in 0..DIMENSIONS.len() {
+        for a in 0..LEN_DIMENSIONS {
             for b in [-SPAN, SPAN] {
                 for i in EDGES {
                     for j in EDGES {
                         for k in EDGES {
                             points[p][a] = b;
-                            points[p][(a + 1) % DIMENSIONS.len()] = i;
-                            points[p][(a + 2) % DIMENSIONS.len()] = j;
-                            points[p][(a + 3) % DIMENSIONS.len()] = k;
+                            points[p][(a + 1) % LEN_DIMENSIONS] = i;
+                            points[p][(a + 2) % LEN_DIMENSIONS] = j;
+                            points[p][(a + 3) % LEN_DIMENSIONS] = k;
                             p += 1;
                         }
                     }
@@ -50,12 +50,12 @@ impl Tesseract {
         for flags in 0..4 {
             let shell = flags & 1 == 0;
             let negative = flags & 2 == 0;
-            for mut dimensions in 0..DIMENSIONS.len().pow(3) {
-                let a = dimensions % DIMENSIONS.len();
-                dimensions /= DIMENSIONS.len();
-                let b = dimensions % DIMENSIONS.len();
-                dimensions /= DIMENSIONS.len();
-                let c = dimensions % DIMENSIONS.len();
+            for mut dimensions in 0..LEN_DIMENSIONS.pow(3) {
+                let a = dimensions % LEN_DIMENSIONS;
+                dimensions /= LEN_DIMENSIONS;
+                let b = dimensions % LEN_DIMENSIONS;
+                dimensions /= LEN_DIMENSIONS;
+                let c = dimensions % LEN_DIMENSIONS;
                 if a == b || b == c || c == a {
                     continue;
                 }
@@ -102,27 +102,13 @@ impl Tesseract {
     }
 
     pub fn input(&mut self, s: String) {
-        if s.len() != 4 {
-            return;
-        }
         let chars = s.chars().collect::<Vec<char>>();
-        let layer = chars[0] as usize - '0' as usize;
-        if let Some(a) = DIMENSIONS
-            .iter()
-            .position(|&d| d == chars[1].to_ascii_lowercase())
-        {
-            if let Some(b) = DIMENSIONS
-                .iter()
-                .position(|&d| d == chars[2].to_ascii_lowercase())
-            {
-                if let Some(c) = DIMENSIONS
-                    .iter()
-                    .position(|&d| d == chars[3].to_ascii_lowercase())
-                {
-                    self.apply([layer, a, b, c]);
-                }
-            }
-        }
+        self.apply([
+            chars[0] as usize - '0' as usize,
+            chars[1] as usize - 'w' as usize,
+            chars[2] as usize - 'w' as usize,
+            chars[3] as usize - 'w' as usize,
+        ]);
     }
 
     pub fn project(&self, b: usize, s: isize) -> String {
@@ -132,9 +118,9 @@ impl Tesseract {
             .zip(self.state)
             .filter(|(point, _)| point[b] * s < SPAN)
             .map(|(point, c)| {
-                let x = (SPAN * point[(b + 1) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
-                let y = (SPAN * point[(b + 2) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
-                let z = (SPAN * point[(b + 3) % DIMENSIONS.len()]) / (SPAN - s * point[b]);
+                let x = (SPAN * point[(b + 1) % LEN_DIMENSIONS]) / (SPAN - s * point[b]);
+                let y = (SPAN * point[(b + 2) % LEN_DIMENSIONS]) / (SPAN - s * point[b]);
+                let z = (SPAN * point[(b + 3) % LEN_DIMENSIONS]) / (SPAN - s * point[b]);
                 let xr0 = (4 * x - 3 * z) / 5;
                 let zr0 = (3 * x + 4 * z) / 5;
                 let zr1 = (4 * zr0 - 3 * y) / 5;
