@@ -1,4 +1,4 @@
-use std::{ascii::AsciiExt, collections::BTreeMap, ops::Index};
+use std::collections::BTreeMap;
 
 use wasm_bindgen::prelude::*;
 
