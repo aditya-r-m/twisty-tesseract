@@ -19,7 +19,7 @@ const COLORS: [&str; 2 * DIMENSIONS.len()] = [
 pub struct Tesseract {
     points: [[isize; DIMENSIONS.len()]; LEN],
     state: [usize; LEN],
-    actions: BTreeMap<([bool; 2], [usize; 3]), [usize; LEN]>,
+    actions: BTreeMap<[usize; 4], [usize; LEN]>,
 }
 
 #[wasm_bindgen]
@@ -46,7 +46,7 @@ impl Tesseract {
         for i in 0..LEN {
             state[i] = i;
         }
-        let mut actions: BTreeMap<([bool; 2], [usize; 3]), [usize; LEN]> = BTreeMap::new();
+        let mut actions: BTreeMap<[usize; 4], [usize; LEN]> = BTreeMap::new();
         for flags in 0..4 {
             let shell = flags & 1 == 0;
             let negative = flags & 2 == 0;
@@ -73,7 +73,15 @@ impl Tesseract {
                         action[i] = points.iter().position(|&point| point == point_j).unwrap();
                     }
                 }
-                actions.insert(([shell, negative], [a, b, c]), action);
+                actions.insert(
+                    [
+                        if negative { 0 } else { 2 } + if shell == negative { 1 } else { 0 },
+                        a,
+                        b,
+                        c,
+                    ],
+                    action,
+                );
             }
         }
         Tesseract {
@@ -83,7 +91,7 @@ impl Tesseract {
         }
     }
 
-    fn apply(&mut self, key: ([bool; 2], [usize; 3])) {
+    fn apply(&mut self, key: [usize; 4]) {
         if let Some(action) = self.actions.get(&key) {
             let mut state = self.state.clone();
             for i in 0..LEN {
@@ -98,8 +106,7 @@ impl Tesseract {
             return;
         }
         let chars = s.chars().collect::<Vec<char>>();
-        let shell = chars[0] == 'o';
-        let negative = chars[1].is_ascii_lowercase();
+        let layer = chars[0] as usize - '0' as usize;
         if let Some(a) = DIMENSIONS
             .iter()
             .position(|&d| d == chars[1].to_ascii_lowercase())
@@ -112,7 +119,7 @@ impl Tesseract {
                     .iter()
                     .position(|&d| d == chars[3].to_ascii_lowercase())
                 {
-                    self.apply(([shell, negative], [a, b, c]));
+                    self.apply([layer, a, b, c]);
                 }
             }
         }

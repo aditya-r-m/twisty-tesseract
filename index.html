@@ -47,8 +47,9 @@
         renderLoop();
         let input = '';
         document.body.addEventListener("keydown", ({ key }) => {
-          if (!['i','o','w','x','y','z'].includes(key.toLowerCase())) return;
-          if (key == 'i' || key == 'o') {
+          key = key.toLowerCase();
+          if (!['0','1','2','3','w','x','y','z'].includes(key)) return;
+          if (['0','1','2','3'].includes(key)) {
             input = '';
           }
           input += key;
