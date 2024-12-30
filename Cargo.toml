@@ -2,7 +2,7 @@
 name = "twisty-tesseract"
 version = "0.1.0"
 authors = ["Aditya Mishra <adityam.rtm@gmail.com>"]
-description = "A sample project with wasm-pack"
+description = "permutation puzzle in the shape of 4-dimensional hyper-rubik's-cube of size 4"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/aditya-r-m/twisty-tesseract"
 edition = "2021"

@@ -2,9 +2,12 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <title>hello-wasm example</title>
+    <title>Twisty Tesseract</title>
   </head>
-  <body style="max-width: max-content; margin: auto">
+  <body style="max-width: max-content; margin: auto; font-size: 40px;">
+    <span
+      title="Input format : 1 digit key [0..3] followed by 3 distinct axis character keys [w..z]&#013;For example : 0wxy, 3wxy, 1xyz, ...&#013;Source code : https://github.com/aditya-r-m/twisty-tesseract"
+      style="position: absolute; left: 10px; top: 5px; cursor: pointer;">&#9432;</span>
     <script type="module">
       import init, { Tesseract } from "./pkg/twisty_tesseract.js";
       init().then(() => {
