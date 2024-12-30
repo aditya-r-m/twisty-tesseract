@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{ascii::AsciiExt, collections::BTreeMap, ops::Index};
 
 use wasm_bindgen::prelude::*;
 
@@ -19,7 +19,7 @@ const COLORS: [&str; 2 * DIMENSIONS.len()] = [
 pub struct Tesseract {
     points: [[isize; DIMENSIONS.len()]; LEN],
     state: [usize; LEN],
-    actions: BTreeMap<(bool, isize, isize), [usize; LEN]>,
+    actions: BTreeMap<([bool; 2], [usize; 3]), [usize; LEN]>,
 }
 
 #[wasm_bindgen]
@@ -46,26 +46,75 @@ impl Tesseract {
         for i in 0..LEN {
             state[i] = i;
         }
-        let mut actions: BTreeMap<(bool, isize, isize), [usize; LEN]> = BTreeMap::new();
-        for d in [-1isize, 1isize] {
-            for a in 0..DIMENSIONS.len() as isize {
-                for sign_a in [-1isize, 1isize] {
-                    for b in 0..DIMENSIONS.len() as isize {
-                        for sign_b in [-1isize, 1isize] {
-                            let mut action = [0; LEN];
-                            for i in 0..LEN {
-                                action[i] = i;
-                            }
-                            actions.insert((d < 0, sign_a * a, sign_b * b), action);
-                        }
+        let mut actions: BTreeMap<([bool; 2], [usize; 3]), [usize; LEN]> = BTreeMap::new();
+        for flags in 0..4 {
+            let shell = flags & 1 == 0;
+            let negative = flags & 2 == 0;
+            for mut dimensions in 0..DIMENSIONS.len().pow(3) {
+                let a = dimensions % DIMENSIONS.len();
+                dimensions /= DIMENSIONS.len();
+                let b = dimensions % DIMENSIONS.len();
+                dimensions /= DIMENSIONS.len();
+                let c = dimensions % DIMENSIONS.len();
+                if a == b || b == c || c == a {
+                    continue;
+                }
+                let mut action = [0; LEN];
+                for i in 0..LEN {
+                    action[i] = i;
+                    if points[i][a as usize] * if negative { -1 } else { 1 } > 0
+                        && (shell
+                            != (points[i][a as usize] * if negative { -1 } else { 1 }
+                                > OFFSET_SMALL))
+                    {
+                        let mut point_j = points[i];
+                        point_j[c] = points[i][b];
+                        point_j[b] = -points[i][c];
+                        action[i] = points.iter().position(|&point| point == point_j).unwrap();
                     }
                 }
+                actions.insert(([shell, negative], [a, b, c]), action);
             }
         }
         Tesseract {
             points,
             state,
             actions,
+        }
+    }
+
+    fn apply(&mut self, key: ([bool; 2], [usize; 3])) {
+        if let Some(action) = self.actions.get(&key) {
+            let mut state = self.state.clone();
+            for i in 0..LEN {
+                state[action[i]] = self.state[i];
+            }
+            self.state = state;
+        }
+    }
+
+    pub fn input(&mut self, s: String) {
+        if s.len() != 4 {
+            return;
+        }
+        let chars = s.chars().collect::<Vec<char>>();
+        let shell = chars[0] == 'o';
+        let negative = chars[1].is_ascii_lowercase();
+        if let Some(a) = DIMENSIONS
+            .iter()
+            .position(|&d| d == chars[1].to_ascii_lowercase())
+        {
+            if let Some(b) = DIMENSIONS
+                .iter()
+                .position(|&d| d == chars[2].to_ascii_lowercase())
+            {
+                if let Some(c) = DIMENSIONS
+                    .iter()
+                    .position(|&d| d == chars[3].to_ascii_lowercase())
+                {
+                    self.apply(([shell, negative], [a, b, c]));
+                }
+            }
         }
     }
 

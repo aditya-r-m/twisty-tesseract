@@ -30,9 +30,21 @@
             context.strokeStyle = 'black';
             context.stroke();
           }
-          //requestAnimationFrame(renderLoop);
+          requestAnimationFrame(renderLoop);
         };
         renderLoop();
+        let input = '';
+        document.body.addEventListener("keydown", ({ key }) => {
+          if (!['i','o','w','x','y','z'].includes(key.toLowerCase())) return;
+          if (key == 'i' || key == 'o') {
+            input = '';
+          }
+          input += key;
+          if (input.length == 4) {
+            window.tesseract.input(input);
+            input = '';
+          }
+        });
       });
     </script>
   </body>
