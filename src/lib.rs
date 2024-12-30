@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 use wasm_bindgen::prelude::*;
 
@@ -10,6 +10,7 @@ const OFFSET_SMALL: isize = 15;
 const OFFSET_LARGE: isize = 45;
 const EDGES: [isize; 4] = [-OFFSET_LARGE, -OFFSET_SMALL, OFFSET_SMALL, OFFSET_LARGE];
 const RADIUS: isize = 7;
+const ANIMATION_FRAMES: isize = 30;
 
 const COLORS: [&str; 2 * LEN_DIMENSIONS] = [
     "RED", "GREEN", "BLUE", "CYAN", "MAGENTA", "YELLOW", "WHITE", "PURPLE",
@@ -20,6 +21,8 @@ pub struct Tesseract {
     points: [[isize; LEN_DIMENSIONS]; LEN],
     state: [usize; LEN],
     actions: BTreeMap<[usize; 4], [usize; LEN]>,
+    pending_actions: VecDeque<[usize; 4]>,
+    animation_step: isize,
 }
 
 #[wasm_bindgen]
@@ -88,6 +91,8 @@ impl Tesseract {
             points,
             state,
             actions,
+            pending_actions: VecDeque::new(),
+            animation_step: 0,
         }
     }
 
@@ -103,7 +108,7 @@ impl Tesseract {
 
     pub fn input(&mut self, s: String) {
         let chars = s.chars().collect::<Vec<char>>();
-        self.apply([
+        self.pending_actions.push_back([
             chars[0] as usize - '0' as usize,
             chars[1] as usize - 'w' as usize,
             chars[2] as usize - 'w' as usize,
@@ -111,10 +116,38 @@ impl Tesseract {
         ]);
     }
 
+    pub fn tick(&mut self) {
+        if self.pending_actions.is_empty() {
+            return;
+        }
+        self.animation_step += 1;
+        self.animation_step %= ANIMATION_FRAMES;
+        if self.animation_step != 0 {
+            return;
+        }
+        if let Some(action) = self.pending_actions.pop_front() {
+            self.apply(action);
+        }
+    }
+
     pub fn project(&self, b: usize, s: isize) -> String {
         let mut projection = self
             .points
             .iter()
+            .cloned()
+            .enumerate()
+            .map(|(p, mut point)| {
+                if let Some(action_key) = self.pending_actions.get(0) {
+                    if let Some(action) = self.actions.get(action_key) {
+                        for i in 0..4 {
+                            point[i] = ((ANIMATION_FRAMES - self.animation_step) * point[i]
+                                + self.animation_step * self.points[action[p]][i])
+                                / ANIMATION_FRAMES;
+                        }
+                    }
+                }
+                point
+            })
             .zip(self.state)
             .filter(|(point, _)| point[b] * s < SPAN)
             .map(|(point, c)| {
@@ -127,6 +160,7 @@ impl Tesseract {
                 let yr1 = (3 * zr0 + 4 * y) / 5;
                 (zr1, yr1, xr0, c / LEN_FACE)
             })
+            .filter(|&(z, _, _, _)| z < 8 * SPAN)
             .collect::<Vec<(isize, isize, isize, usize)>>();
         projection.sort();
         projection
@@ -134,7 +168,7 @@ impl Tesseract {
             .map(|(z, y, x, color)| {
                 format!(
                     "{x},{y},{},{}",
-                    (8 * SPAN * RADIUS) / (8 * SPAN - z),
+                    (8 * SPAN * RADIUS) / (8 * SPAN - z).abs(),
                     COLORS[color]
                 )
             })
