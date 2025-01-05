@@ -175,4 +175,8 @@ impl Tesseract {
             .collect::<Vec<String>>()
             .join("|")
     }
+
+    pub fn solve(&self) -> String {
+        format!("WIP")
+    }
 }
