@@ -1,0 +1,22 @@
+theme = "github_light_high_contrast"
+
+[keys.normal]
+w = ":w"
+q = ":wq"
+r = ":reload"
+x = ["extend_line_below","select_mode"]
+
+[editor]
+mouse = true
+true-color = true
+line-number = "relative"
+
+[editor.auto-pairs]
+'(' = ')'
+'{' = '}'
+'[' = ']'
+'"' = '"'
+
+[keys.select]
+j = "extend_line_below"
+k = "extend_line_above"

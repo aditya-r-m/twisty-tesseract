@@ -12,3 +12,10 @@ There are no project dependencies outside the standard rust toolchain, but the f
 ```
 alias tx='tmux new-session \; set -s escape-time 0 \; split-window -h -l 128 \; set -g status off \; bind-key r send-keys -t 0 "wasm-pack build --target web" Enter \; attach'
 ```
+
+The following dev-container can be useful for an integrated setup based on these tools:
+```
+docker build . -t dev_container
+docker run --name dev_container -itd -p 8000:8000 -p 8080:8080 -v ~/.ssh:/root/.ssh -v .:/root/projects dev_container
+docker exec -it --detach-keys="ctrl-^" -w /root/projects dev_container bash
+```
